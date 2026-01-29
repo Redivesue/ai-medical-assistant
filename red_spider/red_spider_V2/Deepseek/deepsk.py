@@ -14,7 +14,7 @@ class DS_RedSpider:
 
     def __init__(
         self,
-        api_key: Optional[str] ="sk-b5483765b3a045a196e09f8d2b3d1ae3" ,
+        api_key: Optional[str] = None,
         base_url: str = "https://api.deepseek.com",
         model: str = "deepseek-chat",
     ) -> None:
