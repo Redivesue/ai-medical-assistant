@@ -68,23 +68,73 @@ if RED_SPIDER_ROOT is None:
     RED_SPIDER_ROOT = RED_SPIDER_ROOT_GITHUB
     import logging
     logger = logging.getLogger(__name__)
-    error_msg = (
-        f"未找到 red_spider 目录！\n"
-        f"当前文件: {CURRENT_FILE}\n"
-        f"仓库根目录: {REPO_ROOT}\n"
-        f"已尝试的路径:\n"
-    )
+    
+    # 收集详细的诊断信息
+    error_msg_parts = [
+        "=" * 60,
+        "❌ 未找到 red_spider 目录！",
+        "=" * 60,
+        f"当前文件: {CURRENT_FILE}",
+        f"当前工作目录: {Path.cwd()}",
+        f"仓库根目录 (parents[3]): {REPO_ROOT}",
+        f"仓库根目录是否存在: {REPO_ROOT.exists()}",
+        "",
+        "已尝试的路径:",
+    ]
+    
     for name, candidate in candidates:
         deepseek_dir = candidate / "red_spider_V2" / "Deepseek"
-        error_msg += (
-            f"  - {name}: {candidate}\n"
-            f"    存在: {candidate.exists()}\n"
-            f"    Deepseek目录存在: {deepseek_dir.exists() if candidate.exists() else False}\n"
-            f"    robot.py存在: {(deepseek_dir / 'robot.py').exists() if deepseek_dir.exists() else False}\n"
-        )
+        robot_file = deepseek_dir / "robot.py"
+        error_msg_parts.extend([
+            f"  [{name}]",
+            f"    路径: {candidate}",
+            f"    存在: {candidate.exists()}",
+            f"    Deepseek目录: {deepseek_dir}",
+            f"    Deepseek目录存在: {deepseek_dir.exists() if candidate.exists() else False}",
+            f"    robot.py: {robot_file}",
+            f"    robot.py存在: {robot_file.exists() if deepseek_dir.exists() else False}",
+            "",
+        ])
+    
+    # 列出仓库根目录下的所有文件和目录
+    if REPO_ROOT.exists():
+        try:
+            repo_contents = list(REPO_ROOT.iterdir())
+            error_msg_parts.extend([
+                f"仓库根目录 ({REPO_ROOT}) 下的内容:",
+                *[f"  - {item.name} ({'目录' if item.is_dir() else '文件'})" for item in repo_contents[:20]],
+                "" if len(repo_contents) <= 20 else f"  ... 还有 {len(repo_contents) - 20} 个项目",
+                "",
+            ])
+        except Exception as e:
+            error_msg_parts.append(f"无法列出仓库根目录内容: {e}")
+    
+    error_msg_parts.extend([
+        "=" * 60,
+        "解决方案:",
+        "1. 确保 red_spider 目录在 Git 仓库根目录下",
+        "2. 检查 .gitignore 是否排除了 red_spider 目录",
+        "3. 提交并推送 red_spider 目录到 GitHub",
+        "=" * 60,
+    ])
+    
+    error_msg = "\n".join(error_msg_parts)
     logger.error(error_msg)
+    # 同时打印到控制台（在 Render 上可以看到）
+    print(error_msg)
 
 DEEPSEEK_DIR = RED_SPIDER_ROOT / "red_spider_V2" / "Deepseek"
+
+# 在启动时打印路径信息（便于调试）
+import logging
+logger = logging.getLogger(__name__)
+logger.info(
+    f"Red_Spider 路径配置:\n"
+    f"  RED_SPIDER_ROOT: {RED_SPIDER_ROOT}\n"
+    f"  DEEPSEEK_DIR: {DEEPSEEK_DIR}\n"
+    f"  DEEPSEEK_DIR 存在: {DEEPSEEK_DIR.exists()}\n"
+    f"  robot.py 存在: {(DEEPSEEK_DIR / 'robot.py').exists() if DEEPSEEK_DIR.exists() else False}"
+)
 
 if str(DEEPSEEK_DIR) not in sys.path:
     sys.path.append(str(DEEPSEEK_DIR))
@@ -92,19 +142,39 @@ if str(DEEPSEEK_DIR) not in sys.path:
 try:
     # type: ignore[import]
     from robot import Red_Spider  # noqa: E402
+    logger.info("✅ 成功导入 Red_Spider")
 except ImportError as exc:  # pragma: no cover - 导入失败只在环境异常时出现
     import logging
     logger = logging.getLogger(__name__)
-    logger.error(
-        f"无法从 {DEEPSEEK_DIR} 导入 Red_Spider。\n"
-        f"当前工作目录: {Path.cwd()}\n"
-        f"RED_SPIDER_ROOT: {RED_SPIDER_ROOT}\n"
-        f"DEEPSEEK_DIR 是否存在: {DEEPSEEK_DIR.exists()}\n"
-        f"sys.path 包含: {[p for p in sys.path if 'red_spider' in p or 'Deepseek' in p]}"
-    )
+    
+    # 更详细的错误信息
+    error_details = [
+        "=" * 60,
+        "❌ 无法导入 Red_Spider",
+        "=" * 60,
+        f"尝试从: {DEEPSEEK_DIR}",
+        f"DEEPSEEK_DIR 是否存在: {DEEPSEEK_DIR.exists()}",
+        f"当前工作目录: {Path.cwd()}",
+        f"RED_SPIDER_ROOT: {RED_SPIDER_ROOT}",
+        "",
+        "sys.path 中的相关路径:",
+        *[f"  - {p}" for p in sys.path if 'red_spider' in p or 'Deepseek' in p or 'backend' in p],
+        "",
+        f"原始错误: {exc}",
+        "=" * 60,
+    ]
+    
+    error_msg = "\n".join(error_details)
+    logger.error(error_msg)
+    print(error_msg)  # 打印到控制台
+    
     raise ImportError(
-        f"无法从 {DEEPSEEK_DIR} 导入 Red_Spider，请检查目录结构和 Python 路径配置。\n"
-        f"确保 red_spider 目录在仓库根目录下，且路径为: {RED_SPIDER_ROOT}",
+        f"无法从 {DEEPSEEK_DIR} 导入 Red_Spider。\n"
+        f"请检查:\n"
+        f"1. red_spider 目录是否在仓库根目录下\n"
+        f"2. red_spider/red_spider_V2/Deepseek/robot.py 文件是否存在\n"
+        f"3. 查看上面的详细错误信息\n"
+        f"\n当前路径: {RED_SPIDER_ROOT}",
     ) from exc
 
 
