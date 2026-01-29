@@ -6,34 +6,34 @@ from typing import Optional
 from chat_gpt import ChatGPT
 
 # ---------------------------------------------------------------------------
-# 云端路径配置（仅有 Deepseek 和 red_spider_base 两个目录）
+# 路径配置（兼容本地和 GitHub/Render 部署）
 #
-# 当前文件路径（云端）大致为：
-#   /workspace/
-#       ├── Deepseek/
-#       │     └── robot.py （当前文件）
-#       └── red_spider_base/
-#             ├── question_classifier.py
-#             ├── question_parser.py
-#             └── answer_search.py
+# GitHub 仓库结构：
+#   ai-medical-assistance/
+#       ├── backend/
+#       └── red_spider/
+#           ├── red_spider_V2/
+#           │   └── Deepseek/
+#           │       └── robot.py （当前文件）
+#           └── red_spider_base/
+#               ├── question_classifier.py
+#               ├── question_parser.py
+#               └── answer_search.py
+#
+# 当前文件路径：
+#   本地: .../red_spider/red_spider_V2/Deepseek/robot.py
+#   Render: /opt/render/project/red_spider/red_spider_V2/Deepseek/robot.py
 # ---------------------------------------------------------------------------
-CURRENT_DIR = os.path.dirname(__file__)           # .../red_spider/red_spider_V2/Deepseek 或 /workspace/Deepseek
-REPO_ROOT = os.path.dirname(CURRENT_DIR)         # 本地: .../red_spider/red_spider_V2；云端: .../workspace
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))  # .../red_spider/red_spider_V2/Deepseek
+V2_DIR = os.path.dirname(CURRENT_DIR)                     # .../red_spider/red_spider_V2
+RED_SPIDER_ROOT = os.path.dirname(V2_DIR)                 # .../red_spider (仓库中的 red_spider 目录)
 
-# 同时兼容两种目录结构：
-# 1) 云端：  /workspace/
-#          ├── Deepseek/
-#          └── red_spider_base/
-# 2) 本地： /Users/.../red_spider/
-#          ├── red_spider_base/
-#          └── red_spider_V2/Deepseek/
-BASE_DIR_CLOUD = os.path.join(REPO_ROOT, "red_spider_base")
-PROJECT_ROOT = os.path.dirname(REPO_ROOT)
-BASE_DIR_LOCAL = os.path.join(PROJECT_ROOT, "red_spider_base")
+# red_spider_base 目录路径
+BASE_DIR = os.path.join(RED_SPIDER_ROOT, "red_spider_base")
 
-for base_dir in (BASE_DIR_CLOUD, BASE_DIR_LOCAL):
-    if os.path.isdir(base_dir) and base_dir not in sys.path:
-        sys.path.append(base_dir)
+# 添加到 sys.path（如果存在且未添加）
+if os.path.isdir(BASE_DIR) and BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
 
 from question_classifier import QuestionClassifier
 from question_parser import QuestionPaser
