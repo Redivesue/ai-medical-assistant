@@ -51,12 +51,27 @@ def get_neo4j_driver() -> Driver:
             raise ValueError("Neo4j 认证信息未配置，请设置 NEO4J_USER 和 NEO4J_PASSWORD 环境变量")
 
         try:
-            _neo4j_driver = GraphDatabase.driver(
-                settings.neo4j_uri,
-                auth=(settings.neo4j_user, settings.neo4j_password),
+            # 根据URI方案决定是否设置encrypted参数
+            # neo4j+s:// 和 neo4j+ssc:// 已经包含加密信息，不能设置encrypted参数
+            # bolt:// 和 neo4j:// 可以使用encrypted参数
+            uri = settings.neo4j_uri
+            is_encrypted_uri = uri.startswith("neo4j+s://") or uri.startswith("neo4j+ssc://") or \
+                              uri.startswith("bolt+s://") or uri.startswith("bolt+ssc://")
+            
+            if is_encrypted_uri:
+                # 加密URI方案，不设置encrypted参数（驱动会自动处理）
+                _neo4j_driver = GraphDatabase.driver(
+                    uri,
+                    auth=(settings.neo4j_user, settings.neo4j_password),
+                )
+            else:
+                # 非加密URI方案，可以设置encrypted参数
                 # 本地开发通常不需要加密，云端可能需要
-                encrypted=False,
-            )
+                _neo4j_driver = GraphDatabase.driver(
+                    uri,
+                    auth=(settings.neo4j_user, settings.neo4j_password),
+                    encrypted=False,
+                )
 
             # 验证连接
             with _neo4j_driver.session() as session:
