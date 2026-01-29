@@ -1,0 +1,12 @@
+## Android SDK 配置
+## 请复制此文件为 local.properties 并设置正确的 SDK 路径
+
+# macOS 上 Android Studio 默认 SDK 路径
+sdk.dir=/Users/你的用户名/Library/Android/sdk
+
+# 或者如果使用其他路径，请修改为实际路径
+# sdk.dir=/path/to/your/android/sdk
+
+# 如果使用 Android Studio，可以通过以下方式找到 SDK 路径：
+# Android Studio -> Preferences -> Appearance & Behavior -> System Settings -> Android SDK
+# 查看 "Android SDK Location" 字段
