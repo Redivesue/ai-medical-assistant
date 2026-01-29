@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     region: singapore        # 指定服务器区域
-    PYTHON_VERSION: "3.11"  # 指定 Python 版本
+    python_version: "3.11"  # 指定 Python 版本
 
     # 后端代码在 backend 子目录中
     rootDir: backend
