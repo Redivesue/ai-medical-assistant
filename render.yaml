@@ -3,9 +3,11 @@ services:
     name: hongzhizhu-medical-backend
     env: python
     plan: free
+    region: singapore        # 指定服务器区域
+    PYTHON_VERSION: "3.11"  # 指定 Python 版本
 
     # 后端代码在 backend 子目录中
-    rootDirectory: backend
+    rootDir: backend
 
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -14,17 +16,17 @@ services:
       - key: ENVIRONMENT
         value: production
 
-      # DeepSeek 密钥：在 Render 仪表盘中创建名为 deepseek_api_key 的 Secret
-      - key: DEEPSEEK_API_KEY
-        fromSecret: deepseek_api_key
+      # # DeepSeek 密钥：在 Render 仪表盘中创建名为 deepseek_api_key 的 Secret
+      # - key: DEEPSEEK_API_KEY
+      #   sync: false
 
-      # Neo4j 连接信息：根据你的实际部署（本地/云端 Aura 等）在 Render 中设置
-      - key: NEO4J_URI
-        value: bolt://your-neo4j-host:7687
-      - key: NEO4J_USER
-        value: neo4j
-      - key: NEO4J_PASSWORD
-        fromSecret: neo4j_password
+      # # Neo4j 连接信息：根据你的实际部署（本地/云端 Aura 等）在 Render 中设置
+      # - key: NEO4J_URI
+      #   value: bolt://your-neo4j-host:7687
+      # - key: NEO4J_USER
+      #   value: neo4j
+      # - key: NEO4J_PASSWORD
+      #   fromSecret: neo4j_password
 
     # 可选：健康检查路径
     healthCheckPath: /health
