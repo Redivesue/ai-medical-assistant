@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">红蜘蛛AI医疗助手</string>
+    <string name="hint_question">请输入您的问题...</string>
+    <string name="button_send">发送</string>
+    <string name="thinking">红蜘蛛正在思考中...</string>
+    <string name="error_network">网络错误，请检查网络连接</string>
+    <string name="error_empty">请输入您的问题</string>
+</resources>

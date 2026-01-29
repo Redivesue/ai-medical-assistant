@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主色调（橙色，符合红蜘蛛品牌） -->
+    <color name="colorPrimary">#FF6B35</color>
+    <color name="colorPrimaryDark">#E85A2B</color>
+    <color name="colorAccent">#FF6B35</color>
+
+    <!-- 辅助颜色 -->
+    <color name="colorGray">#F0F0F0</color>
+    <color name="colorError">#F44336</color>
+    <color name="colorEmergency">#FF5722</color>
+</resources>

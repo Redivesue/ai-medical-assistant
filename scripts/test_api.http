@@ -1,0 +1,39 @@
+### 红蜘蛛AI医疗助手 - API 测试示例（用于 VSCode/IDEA HTTP Client 或 Postman 参考）
+
+### 1. 健康检查
+GET http://127.0.0.1:8000/health
+
+### 2. 聊天接口 - 正常问题
+POST http://127.0.0.1:8000/api/chat
+Content-Type: application/json
+
+{
+  "question": "感冒的症状是什么？"
+}
+
+### 3. 聊天接口 - 高危症状（应返回 emergency）
+POST http://127.0.0.1:8000/api/chat
+Content-Type: application/json
+
+{
+  "question": "我胸痛，而且呼吸困难，怎么回事？"
+}
+
+### 4. 紧急检测接口 - 单条检测
+POST http://127.0.0.1:8000/api/emergency/check
+Content-Type: application/json
+
+{
+  "question": "我最近胸痛，还感觉呼吸困难"
+}
+
+### 5. 紧急检测接口 - 批量检测
+POST http://127.0.0.1:8000/api/emergency/batch-check
+Content-Type: application/json
+
+[
+  "我有点头痛",
+  "胸痛，呼吸困难",
+  "感冒了"
+]
+
