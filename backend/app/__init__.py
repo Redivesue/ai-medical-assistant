@@ -29,6 +29,29 @@ def create_app() -> FastAPI:
     # 注册紧急症状检测路由
     app.include_router(emergency.router)
 
+    # 应用启动时检查路径配置
+    @app.on_event("startup")
+    async def startup_event() -> None:
+        """应用启动时检查 red_spider 路径配置"""
+        import logging
+        from pathlib import Path
+        
+        logger = logging.getLogger(__name__)
+        logger.info("=" * 60)
+        logger.info("应用启动 - 路径诊断")
+        logger.info("=" * 60)
+        logger.info(f"当前工作目录: {Path.cwd()}")
+        logger.info(f"Python 可执行文件: {Path(__file__).resolve()}")
+        
+        # 检查 red_spider 路径（延迟导入，避免启动失败）
+        try:
+            from app.services import red_spider_service
+            logger.info("✅ Red_Spider 模块导入成功")
+        except ImportError as e:
+            logger.error(f"❌ Red_Spider 模块导入失败: {e}")
+            logger.error("请检查 red_spider 目录是否在仓库根目录下")
+        logger.info("=" * 60)
+
     # 应用关闭时清理资源
     @app.on_event("shutdown")
     async def shutdown_event() -> None:
