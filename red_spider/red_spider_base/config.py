@@ -17,12 +17,22 @@ NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "neo4j")
 
-# 判断是否为 Aura 连接（neo4j+s:// 或 neo4j+ssc://）
-is_aura = NEO4J_URI.startswith("neo4j+s://") or NEO4J_URI.startswith("neo4j+ssc://")
+# 判断是否为加密URI方案（neo4j+s://、neo4j+ssc://、bolt+s://、bolt+ssc://）
+# 这些URI方案已经包含加密信息，不能设置encrypted参数
+is_encrypted_uri = (
+    NEO4J_URI.startswith("neo4j+s://") or 
+    NEO4J_URI.startswith("neo4j+ssc://") or
+    NEO4J_URI.startswith("bolt+s://") or
+    NEO4J_URI.startswith("bolt+ssc://")
+)
 
+# 构建Neo4j配置
+# 注意：加密URI方案不能设置encrypted参数，驱动会自动处理
 NEO4J_CONFIG = {
     "uri": NEO4J_URI,
     "auth": (NEO4J_USER, NEO4J_PASSWORD),
-    # Aura 连接需要加密，本地连接不需要
-    "encrypted": is_aura,
 }
+
+# 只有非加密URI方案才设置encrypted参数
+if not is_encrypted_uri:
+    NEO4J_CONFIG["encrypted"] = False
