@@ -124,9 +124,16 @@ class MainActivity : AppCompatActivity() {
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    // 错误处理
+                    // 错误处理：显示后端返回的具体错误信息
+                    val errorText = if (response.error != null) {
+                        // 显示后端返回的错误信息
+                        response.error.message
+                    } else {
+                        // 如果没有错误信息，显示默认提示
+                        "抱歉，服务暂时不可用，请稍后重试。"
+                    }
                     val errorMessage = ChatMessage(
-                        text = "抱歉，服务暂时不可用，请稍后重试。",
+                        text = errorText,
                         isUser = false,
                         isError = true,
                         timestamp = System.currentTimeMillis()
@@ -144,9 +151,24 @@ class MainActivity : AppCompatActivity() {
                     chatAdapter.notifyItemRemoved(loadingIndex)
                 }
 
-                // 显示错误消息
+                // 根据异常类型显示更友好的错误信息
+                val errorText = when {
+                    e.message?.contains("timeout", ignoreCase = true) == true -> {
+                        "请求超时，服务器可能正在启动中（免费版服务需要30-60秒唤醒），请稍后重试。"
+                    }
+                    e.message?.contains("Unable to resolve host", ignoreCase = true) == true -> {
+                        "网络连接失败，请检查网络设置。"
+                    }
+                    e.message?.contains("Connection refused", ignoreCase = true) == true -> {
+                        "无法连接到服务器，请检查服务器地址是否正确。"
+                    }
+                    else -> {
+                        "网络错误：${e.message ?: "未知错误"}"
+                    }
+                }
+
                 val errorMessage = ChatMessage(
-                    text = "网络错误：${e.message}",
+                    text = errorText,
                     isUser = false,
                     isError = true,
                     timestamp = System.currentTimeMillis()
@@ -157,8 +179,8 @@ class MainActivity : AppCompatActivity() {
 
                 Toast.makeText(
                     this@MainActivity,
-                    "请求失败：${e.message}",
-                    Toast.LENGTH_SHORT
+                    errorText,
+                    Toast.LENGTH_LONG
                 ).show()
 
             } finally {
